@@ -2,7 +2,7 @@
 
 A modern, feature-rich todo list application built with React, TypeScript, and Vite. This application demonstrates best practices in React development with a clean architecture, comprehensive testing, and modern UI components.
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 
@@ -28,7 +28,7 @@ A modern, feature-rich todo list application built with React, TypeScript, and V
 - **Testing**: Comprehensive test suite with Vitest and Testing Library
 - **Code Quality**: ESLint configuration with TypeScript support
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite
 - **Styling**: Tailwind CSS 4
@@ -52,7 +52,7 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/KennethAduan/todo-list-application.git
 cd todo-list-application
 ```
 
@@ -156,7 +156,7 @@ src/
 - **Todo List** (`/todo-list`): Basic todo list view
 - **Improved UI** (`/improved-ui`): Full-featured todo management with CRUD operations
 
-## 🔧 Development
+## Development
 
 ### Code Quality
 
@@ -175,8 +175,6 @@ bun run lint --fix
 bun run build
 ```
 
-## 🚀 Deployment
-
 ### Build and Preview
 
 ```bash
@@ -186,7 +184,5 @@ bun run build
 # Preview the built application
 bun run preview
 ```
-
 ---
 
-**Happy coding! 🎉**
