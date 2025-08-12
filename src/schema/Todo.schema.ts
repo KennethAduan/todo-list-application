@@ -2,14 +2,23 @@ import { z } from "zod";
 
 // Schema for creating a todo - only title required
 export const CreateTodoSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .refine((val) => val.trim().length > 0, "Title is required"),
   description: z.string().optional().default(""),
 });
 
 // Schema for creating a todo with required description
 export const CreateTodoWithDescriptionSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .refine((val) => val.trim().length > 0, "Title is required"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .refine((val) => val.trim().length > 0, "Description is required"),
 });
 
 // Full todo schema (for existing todos)
