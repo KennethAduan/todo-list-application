@@ -1,69 +1,192 @@
-# React + TypeScript + Vite
+# Todo List Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, feature-rich todo list application built with React, TypeScript, and Vite. This application demonstrates best practices in React development with a clean architecture, comprehensive testing, and modern UI components.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Core Functionality
 
-## Expanding the ESLint configuration
+- **Create Todos**: Add simple todos with just a title or detailed todos with descriptions
+- **Edit Todos**: Modify existing todo titles and descriptions
+- **Toggle Completion**: Mark todos as complete or incomplete
+- **Delete Todos**: Remove todos with confirmation dialogs
+- **Persistent Storage**: Todos are automatically saved to localStorage
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### User Interface
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Modern UI Components**: Built with Tailwind CSS and custom component library
+- **Interactive Dialogs**: Edit and delete confirmation modals
+- **Form Validation**: Real-time validation using Zod schemas
+- **Toast Notifications**: User feedback for actions (planned)
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Technical Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Type Safety**: Full TypeScript implementation with Zod schema validation
+- **State Management**: Zustand for efficient state management
+- **Routing**: TanStack Router for client-side navigation
+- **Testing**: Comprehensive test suite with Vitest and Testing Library
+- **Code Quality**: ESLint configuration with TypeScript support
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS 4
+- **State Management**: Zustand
+- **Routing**: TanStack Router
+- **Form Handling**: React Hook Form with Zod validation
+- **Testing**: Vitest, Testing Library
+- **Build Tool**: Vite
+- **Package Manager**: Bun
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [Bun](https://bun.sh/) (recommended) or npm/yarn
+- Git
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-repository-url>
+cd todo-list-application
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install Dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Using Bun (recommended)
+bun install
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Or using npm
+npm install
+
+# Or using yarn
+yarn install
 ```
+
+### 3. Start Development Server
+
+```bash
+# Using Bun
+bun run dev
+
+# Or using npm
+npm run dev
+
+# Or using yarn
+yarn dev
+```
+
+The application will be available at `http://localhost:5173`
+
+### 4. Build for Production
+
+```bash
+# Using Bun
+bun run build
+
+# Or using npm
+npm run build
+
+# Or using yarn
+yarn build
+```
+
+## Testing
+
+### Run Tests
+
+```bash
+# Run tests in watch mode
+bun run test
+
+# Run tests once
+bun run test:run
+
+# Run tests with UI
+bun run test:ui
+```
+
+### Test Coverage
+
+The project includes comprehensive testing for:
+
+- Component rendering and interactions
+- State management logic
+- Schema validation
+- User interactions and form submissions
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── checkbox.tsx
+│   ├── dialog.tsx
+│   ├── input-field.tsx
+│   ├── label.tsx
+│   ├── navbar.tsx
+│   ├── table.tsx
+│   └── toast.tsx
+├── constants/           # Application constants
+│   └── app.routes.ts
+├── hooks/              # Custom React hooks
+│   ├── use-toast.ts
+│   └── useTodos.ts
+├── pages/              # Page components
+│   ├── home/           # Home page with simple todo form
+│   └── improve-ui/     # Enhanced UI with full CRUD operations
+├── routes/             # TanStack Router configuration
+├── schema/             # Zod validation schemas
+├── store/              # Zustand state management
+├── utils/              # Utility functions
+└── main.tsx            # Application entry point
+```
+
+## Available Routes
+
+- **Home** (`/`): Simple todo creation interface
+- **Todo List** (`/todo-list`): Basic todo list view
+- **Improved UI** (`/improved-ui`): Full-featured todo management with CRUD operations
+
+## 🔧 Development
+
+### Code Quality
+
+```bash
+# Run ESLint
+bun run lint
+
+# Fix ESLint issues automatically
+bun run lint --fix
+```
+
+### Type Checking
+
+```bash
+# Check TypeScript types
+bun run build
+```
+
+## 🚀 Deployment
+
+### Build and Preview
+
+```bash
+# Build the application
+bun run build
+
+# Preview the built application
+bun run preview
+```
+
+---
+
+**Happy coding! 🎉**

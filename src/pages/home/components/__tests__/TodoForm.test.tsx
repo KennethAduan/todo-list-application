@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { TodoForm } from "../todo-form";
+import { ToastProvider } from "@/components/toast";
 
 // Mock the useTodos hook
 const mockCreateTodo = vi.fn();
@@ -32,23 +33,19 @@ vi.mock("../todo-item", () => ({
     <div data-testid={`todo-item-${index}`}>
       <input
         data-testid={`todo-title-${index}`}
-        placeholder="Todo title"
-        defaultValue=""
-      />
-      <textarea
-        data-testid={`todo-description-${index}`}
-        placeholder="Todo description"
+        placeholder="Task Name"
         defaultValue=""
       />
       {error && <span data-testid={`todo-error-${index}`}>{error}</span>}
-      <button
-        data-testid={`todo-add-${index}`}
-        onClick={() => onAdd()}
-        type="button"
-      >
-        Add
-      </button>
-      {!isOnlyItem && (
+      {isOnlyItem ? (
+        <button
+          data-testid={`todo-add-${index}`}
+          onClick={() => onAdd()}
+          type="button"
+        >
+          Add
+        </button>
+      ) : (
         <button
           data-testid={`todo-delete-${index}`}
           onClick={() => onDelete(index)}
@@ -80,12 +77,12 @@ vi.mock("../todo-item-with-description", () => ({
     <div data-testid={`todo-with-desc-${index}`}>
       <input
         data-testid={`todo-with-desc-title-${index}`}
-        placeholder="Todo title"
+        placeholder="Task Name"
         defaultValue=""
       />
-      <textarea
+      <input
         data-testid={`todo-with-desc-description-${index}`}
-        placeholder="Todo description"
+        placeholder="Description"
         defaultValue=""
       />
       {titleError && (
@@ -98,14 +95,15 @@ vi.mock("../todo-item-with-description", () => ({
           {descriptionError}
         </span>
       )}
-      <button
-        data-testid={`todo-with-desc-add-${index}`}
-        onClick={() => onAdd()}
-        type="button"
-      >
-        Add
-      </button>
-      {!isOnlyItem && (
+      {isOnlyItem ? (
+        <button
+          data-testid={`todo-with-desc-add-${index}`}
+          onClick={() => onAdd()}
+          type="button"
+        >
+          Add
+        </button>
+      ) : (
         <button
           data-testid={`todo-with-desc-delete-${index}`}
           onClick={() => onDelete(index)}
@@ -177,47 +175,56 @@ vi.mock("@/components", () => ({
   ),
 }));
 
+// Helper function to render TodoForm with ToastProvider
+const renderTodoForm = () => {
+  return render(
+    <ToastProvider>
+      <TodoForm />
+    </ToastProvider>
+  );
+};
+
 describe("TodoForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("should render the form with correct title", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     expect(screen.getByText("Add FORM")).toBeInTheDocument();
   });
 
   it("should render both todo sections", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     expect(screen.getByText("TODO LIST")).toBeInTheDocument();
     expect(screen.getByText("TODO LIST with Description")).toBeInTheDocument();
   });
 
   it("should render initial todo items", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     expect(screen.getByTestId("todo-item-0")).toBeInTheDocument();
     expect(screen.getByTestId("todo-with-desc-0")).toBeInTheDocument();
   });
 
   it("should render add buttons for both sections", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     expect(screen.getByTestId("add-todo-button")).toBeInTheDocument();
     expect(screen.getByTestId("add-todo-with-desc-button")).toBeInTheDocument();
   });
 
   it("should render submit button", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     expect(screen.getByTestId("submit-button")).toBeInTheDocument();
     expect(screen.getByTestId("submit-button")).toHaveTextContent("ADD FORM");
   });
 
   it("should render form structure correctly", () => {
-    render(<TodoForm />);
+    renderTodoForm();
 
     // Check if form elements are present
     expect(screen.getByTestId("submit-button")).toBeInTheDocument();
