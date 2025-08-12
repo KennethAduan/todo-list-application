@@ -1,39 +1,39 @@
 import React from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import { Button, InputField } from "../../../components/index";
 import { Plus, X } from "lucide-react";
 
 interface TodoItemProps {
-  todo: { title: string; description: string };
   index: number;
   isOnlyItem: boolean;
   error?: string;
-  onUpdate: (
-    index: number,
-    field: "title" | "description",
-    value: string
-  ) => void;
   onAdd: () => void;
   onDelete: (index: number) => void;
 }
 
 export const TodoItem: React.FC<TodoItemProps> = ({
-  todo,
   index,
   isOnlyItem,
   error,
-  onUpdate,
   onAdd,
   onDelete,
 }) => {
+  const { control } = useFormContext();
+
   return (
     <div className="flex items-start gap-3">
       <div className="flex-1">
-        <InputField
-          value={todo.title}
-          onChange={(e) => onUpdate(index, "title", e.target.value)}
-          placeholder="Task Name"
-          error={error}
-          variant={error ? "error" : "default"}
+        <Controller
+          name={`todos.${index}.title`}
+          control={control}
+          render={({ field }) => (
+            <InputField
+              {...field}
+              placeholder="Task Name"
+              error={error}
+              variant={error ? "error" : "default"}
+            />
+          )}
         />
       </div>
       <div className="flex-shrink-0 pt-0">

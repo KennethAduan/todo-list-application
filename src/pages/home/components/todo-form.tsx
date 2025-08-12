@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-
+import React from "react";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useTodos } from "../../../hooks/useTodos";
-import type { CreateTodoWithDescription } from "../../../schema/Todo.schema";
-import {
-  CreateTodoSchema,
-  CreateTodoWithDescriptionSchema,
-} from "../../../schema/Todo.schema";
+import { CreateTodoWithDescriptionSchema } from "../../../schema/Todo.schema";
 import { z } from "zod";
 import { Button } from "@/components";
 import { TodoItem } from "./todo-item";
@@ -13,120 +10,63 @@ import { TodoItemWithDescription } from "./todo-item-with-description";
 import { TodoList } from "./todo-list";
 import { TodoSection } from "./todo-section";
 
-// Form validation schemas
-const todoFormSchema = z.object({
-  todos: z.array(CreateTodoSchema).min(1, "At least one todo is required"),
-});
-
-const todoWithDescriptionSchema = z.object({
+// Form validation schema
+const formSchema = z.object({
+  todos: z
+    .array(
+      z.object({
+        title: z.string().min(1, "Title is required"),
+        description: z.string(),
+      })
+    )
+    .min(1, "At least one todo is required"),
   todosWithDescription: z
     .array(CreateTodoWithDescriptionSchema)
     .min(1, "At least one todo with description is required"),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 export const TodoForm: React.FC = () => {
   const { createTodo, createTodoWithDescription } = useTodos();
 
-  const [todos, setTodos] = useState<
-    Array<{ title: string; description: string }>
-  >([{ title: "", description: "" }]);
-  const [todosWithDescription, setTodosWithDescription] = useState<
-    CreateTodoWithDescription[]
-  >([{ title: "", description: "" }]);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const methods = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      todos: [{ title: "", description: "" }],
+      todosWithDescription: [{ title: "", description: "" }],
+    },
+  });
 
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = methods;
 
-    // Validate todos using the schema (only title required)
-    const todosResult = todoFormSchema.safeParse({ todos });
-    if (!todosResult.success) {
-      newErrors.todos = todosResult.error.issues[0]?.message || "Invalid todos";
-    }
+  const {
+    fields: todoFields,
+    append: appendTodo,
+    remove: removeTodo,
+  } = useFieldArray({
+    control,
+    name: "todos",
+  });
 
-    // Validate todos with description using the CreateTodoWithDescriptionSchema
-    const todosWithDescriptionResult = todoWithDescriptionSchema.safeParse({
-      todosWithDescription,
-    });
-    if (!todosWithDescriptionResult.success) {
-      newErrors.todosWithDescription =
-        todosWithDescriptionResult.error.issues[0]?.message ||
-        "Invalid todos with description";
-    }
+  const {
+    fields: todoWithDescriptionFields,
+    append: appendTodoWithDescription,
+    remove: removeTodoWithDescription,
+  } = useFieldArray({
+    control,
+    name: "todosWithDescription",
+  });
 
-    // Validate individual todo items (only title required, description is optional)
-    todos.forEach((todo, index) => {
-      if (!todo.title.trim()) {
-        newErrors[`todo-${index}`] = "Task name is required";
-      }
-      // Description validation is skipped for simple todos
-    });
-
-    // Validate individual todos with description (both title and description required)
-    todosWithDescription.forEach((todo, index) => {
-      // Use CreateTodoWithDescriptionSchema for individual validation
-      const individualResult = CreateTodoWithDescriptionSchema.safeParse(todo);
-      if (!individualResult.success) {
-        const fieldErrors = individualResult.error.issues;
-        fieldErrors.forEach((issue) => {
-          if (issue.path.includes("title")) {
-            newErrors[`todoWithDescription-${index}-title`] = issue.message;
-          } else if (issue.path.includes("description")) {
-            newErrors[`todoWithDescription-${index}-description`] =
-              issue.message;
-          }
-        });
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Real-time validation for individual fields
-  const validateField = (
-    fieldType: "todo" | "todoWithDescription",
-    index: number,
-    field: "title" | "description",
-    value: string
-  ) => {
-    const newErrors = { ...errors };
-    const errorKey =
-      fieldType === "todo" ? `todo-${index}` : `${fieldType}-${index}-${field}`;
-
-    if (fieldType === "todo") {
-      // For simple todos, only title is required
-      if (field === "title" && !value.trim()) {
-        newErrors[errorKey] = "Task name is required";
-      } else if (field === "title") {
-        delete newErrors[errorKey];
-      }
-      // Description validation is skipped for simple todos
-    } else {
-      // For todos with description, both fields are required
-      if (!value.trim()) {
-        newErrors[errorKey] =
-          field === "title"
-            ? "Task name is required"
-            : "Description is required";
-      } else {
-        delete newErrors[errorKey];
-      }
-    }
-
-    setErrors(newErrors);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  const onSubmit = async (data: FormData) => {
     try {
       // Create todos without description (only title required)
-      for (const todo of todos) {
+      for (const todo of data.todos) {
         if (todo.title.trim()) {
           await createTodo({
             title: todo.title.trim(),
@@ -136,7 +76,7 @@ export const TodoForm: React.FC = () => {
       }
 
       // Create todos with description
-      for (const todo of todosWithDescription) {
+      for (const todo of data.todosWithDescription) {
         if (todo.title.trim() && todo.description.trim()) {
           await createTodoWithDescription({
             title: todo.title.trim(),
@@ -146,120 +86,116 @@ export const TodoForm: React.FC = () => {
       }
 
       // Reset form
-      setTodos([{ title: "", description: "" }]);
-      setTodosWithDescription([{ title: "", description: "" }]);
-      setErrors({});
+      reset();
     } catch (error) {
       console.error("Error creating todos:", error);
     }
   };
 
   const addTodoItem = () => {
-    setTodos([...todos, { title: "", description: "" }]);
+    appendTodo({ title: "", description: "" });
   };
 
   const addTodoWithDescriptionItem = () => {
-    setTodosWithDescription([
-      ...todosWithDescription,
-      { title: "", description: "" },
-    ]);
+    appendTodoWithDescription({ title: "", description: "" });
   };
 
   const deleteTodo = (index: number) => {
-    if (todos.length > 1) {
-      setTodos(todos.filter((_, i) => i !== index));
+    if (todoFields.length > 1) {
+      removeTodo(index);
     }
   };
 
   const deleteTodoWithDescription = (index: number) => {
-    if (todosWithDescription.length > 1) {
-      setTodosWithDescription(
-        todosWithDescription.filter((_, i) => i !== index)
-      );
+    if (todoWithDescriptionFields.length > 1) {
+      removeTodoWithDescription(index);
     }
   };
 
-  const updateTodo = (
-    index: number,
-    field: "title" | "description",
-    value: string
-  ) => {
-    const newTodos = [...todos];
-    newTodos[index] = { ...newTodos[index], [field]: value };
-    setTodos(newTodos);
-    validateField("todo", index, field, value);
-  };
+  const getFieldError = (fieldName: string) => {
+    const fieldErrors = errors as Record<string, unknown>;
+    const fieldPath = fieldName.split(".");
+    let current: unknown = fieldErrors;
 
-  const updateTodoWithDescription = (
-    index: number,
-    field: "title" | "description",
-    value: string
-  ) => {
-    const newTodos = [...todosWithDescription];
-    newTodos[index] = { ...newTodos[index], [field]: value };
-    setTodosWithDescription(newTodos);
-    validateField("todoWithDescription", index, field, value);
+    for (const path of fieldPath) {
+      if (
+        current &&
+        typeof current === "object" &&
+        current !== null &&
+        path in current
+      ) {
+        current = (current as Record<string, unknown>)[path];
+      } else {
+        return undefined;
+      }
+    }
+
+    return typeof current === "object" &&
+      current !== null &&
+      "message" in current
+      ? (current as { message: string }).message
+      : undefined;
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold text-center mb-8">Add FORM</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* TODO LIST Section */}
-        <TodoSection title="TODO LIST" error={errors.todos}>
-          <TodoList onAdd={addTodoItem} addButtonText="Add TODO LIST">
-            {todos.map((todo, index) => (
-              <TodoItem
-                key={index}
-                todo={todo}
-                index={index}
-                isOnlyItem={todos.length === 1}
-                error={errors[`todo-${index}`]}
-                onUpdate={updateTodo}
-                onAdd={addTodoItem}
-                onDelete={deleteTodo}
-              />
-            ))}
-          </TodoList>
-        </TodoSection>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* TODO LIST Section */}
+          <TodoSection title="TODO LIST" error={errors.todos?.message}>
+            <TodoList onAdd={addTodoItem} addButtonText="Add TODO LIST">
+              {todoFields.map((todo, index) => (
+                <TodoItem
+                  key={todo.id}
+                  index={index}
+                  isOnlyItem={todoFields.length === 1}
+                  error={getFieldError(`todos.${index}.title`)}
+                  onAdd={addTodoItem}
+                  onDelete={deleteTodo}
+                />
+              ))}
+            </TodoList>
+          </TodoSection>
 
-        {/* TODO LIST with Description Section */}
-        <TodoSection
-          title="TODO LIST with Description"
-          error={errors.todosWithDescription}
-        >
-          <TodoList
-            onAdd={addTodoWithDescriptionItem}
-            addButtonText="Add TODO LIST with Description"
+          {/* TODO LIST with Description Section */}
+          <TodoSection
+            title="TODO LIST with Description"
+            error={errors.todosWithDescription?.message}
           >
-            {todosWithDescription.map((todo, index) => (
-              <TodoItemWithDescription
-                key={index}
-                todo={todo}
-                index={index}
-                isOnlyItem={todosWithDescription.length === 1}
-                titleError={errors[`todoWithDescription-${index}-title`]}
-                descriptionError={
-                  errors[`todoWithDescription-${index}-description`]
-                }
-                onUpdate={updateTodoWithDescription}
-                onAdd={addTodoWithDescriptionItem}
-                onDelete={deleteTodoWithDescription}
-              />
-            ))}
-          </TodoList>
-        </TodoSection>
+            <TodoList
+              onAdd={addTodoWithDescriptionItem}
+              addButtonText="Add TODO LIST with Description"
+            >
+              {todoWithDescriptionFields.map((todo, index) => (
+                <TodoItemWithDescription
+                  key={todo.id}
+                  index={index}
+                  isOnlyItem={todoWithDescriptionFields.length === 1}
+                  titleError={getFieldError(
+                    `todosWithDescription.${index}.title`
+                  )}
+                  descriptionError={getFieldError(
+                    `todosWithDescription.${index}.description`
+                  )}
+                  onAdd={addTodoWithDescriptionItem}
+                  onDelete={deleteTodoWithDescription}
+                />
+              ))}
+            </TodoList>
+          </TodoSection>
 
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full bg-gray-800 hover:bg-gray-700 text-white py-4 text-lg font-semibold"
-        >
-          ADD FORM
-        </Button>
-      </form>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full bg-gray-800 hover:bg-gray-700 text-white py-4 text-lg font-semibold"
+          >
+            ADD FORM
+          </Button>
+        </form>
+      </FormProvider>
     </div>
   );
 };
