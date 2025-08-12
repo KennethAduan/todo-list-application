@@ -4,7 +4,7 @@ const HomePage = () => {
   return (
     <div
       data-testid="home-page"
-      className="min-h-screen flex items-center justify-center bg-gray-100 py-2"
+      className="min-h-screen flex items-center justify-center py-2"
     >
       <div
         data-testid="content-wrapper"

@@ -9,6 +9,7 @@ import { TodoItem } from "./todo-item";
 import { TodoItemWithDescription } from "./todo-item-with-description";
 import { TodoList } from "./todo-list";
 import { TodoSection } from "./todo-section";
+import { useToast } from "@/hooks/use-toast";
 
 // Form validation schema
 const formSchema = z.object({
@@ -29,7 +30,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export const TodoForm: React.FC = () => {
   const { createTodo, createTodoWithDescription } = useTodos();
-
+  const { addToast } = useToast();
   const methods = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -85,6 +86,11 @@ export const TodoForm: React.FC = () => {
         }
       }
 
+      addToast({
+        title: "Todos added",
+        description: "Todos added successfully",
+        variant: "success",
+      });
       // Reset form
       reset();
     } catch (error) {

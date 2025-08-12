@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TodoListRouteImport } from './routes/todo-list'
 import { Route as ImprovedUiRouteImport } from './routes/improved-ui'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TodoListRoute = TodoListRouteImport.update({
+  id: '/todo-list',
+  path: '/todo-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImprovedUiRoute = ImprovedUiRouteImport.update({
   id: '/improved-ui',
   path: '/improved-ui',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/improved-ui': typeof ImprovedUiRoute
+  '/todo-list': typeof TodoListRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/improved-ui': typeof ImprovedUiRoute
+  '/todo-list': typeof TodoListRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/improved-ui': typeof ImprovedUiRoute
+  '/todo-list': typeof TodoListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/improved-ui'
+  fullPaths: '/' | '/improved-ui' | '/todo-list'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/improved-ui'
-  id: '__root__' | '/' | '/improved-ui'
+  to: '/' | '/improved-ui' | '/todo-list'
+  id: '__root__' | '/' | '/improved-ui' | '/todo-list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ImprovedUiRoute: typeof ImprovedUiRoute
+  TodoListRoute: typeof TodoListRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/todo-list': {
+      id: '/todo-list'
+      path: '/todo-list'
+      fullPath: '/todo-list'
+      preLoaderRoute: typeof TodoListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/improved-ui': {
       id: '/improved-ui'
       path: '/improved-ui'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ImprovedUiRoute: ImprovedUiRoute,
+  TodoListRoute: TodoListRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
